@@ -15,6 +15,12 @@ pipeline {
 
                         chmod 600 .env
                         chmod 600 backend/.env
+
+                        set -a
+                        . ./.env
+                        set +a
+
+                        echo "Environment files created successfully"
                     '''
                 }
             }
@@ -33,9 +39,24 @@ pipeline {
 
         stage('Build and Start') {
             steps {
-                sh '''
-                    docker compose up -d --build
-                '''
+                withCredentials([
+                    string(credentialsId: 'app-env', variable: 'APP_ENV'),
+                    string(credentialsId: 'backend-env', variable: 'BACKEND_ENV')
+                ]) {
+                    sh '''
+                        printf '%s\\n' "$APP_ENV" > .env
+                        printf '%s\\n' "$BACKEND_ENV" > backend/.env
+
+                        chmod 600 .env
+                        chmod 600 backend/.env
+
+                        set -a
+                        . ./.env
+                        set +a
+
+                        docker compose up -d --build
+                    '''
+                }
             }
         }
 
