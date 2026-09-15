@@ -1,20 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        APP_DIR = '/home/ubuntu/fastapi-mysql-employee-crud'
-    }
-
     stages {
-
-        stage('Pull Latest Code') {
-            steps {
-                sh '''
-                    cd $APP_DIR
-                    git pull origin main
-                '''
-            }
-        }
 
         stage('Create Environment Files') {
             steps {
@@ -23,11 +10,11 @@ pipeline {
                     string(credentialsId: 'backend-env', variable: 'BACKEND_ENV')
                 ]) {
                     sh '''
-                        printf '%s\\n' "$APP_ENV" > $APP_DIR/.env
-                        printf '%s\\n' "$BACKEND_ENV" > $APP_DIR/backend/.env
+                        printf '%s\\n' "$APP_ENV" > .env
+                        printf '%s\\n' "$BACKEND_ENV" > backend/.env
 
-                        chmod 600 $APP_DIR/.env
-                        chmod 600 $APP_DIR/backend/.env
+                        chmod 600 .env
+                        chmod 600 backend/.env
                     '''
                 }
             }
@@ -36,7 +23,6 @@ pipeline {
         stage('Stop Existing Containers') {
             steps {
                 sh '''
-                    cd $APP_DIR
                     docker compose down || true
                 '''
             }
@@ -45,7 +31,6 @@ pipeline {
         stage('Build and Start') {
             steps {
                 sh '''
-                    cd $APP_DIR
                     docker compose up -d --build
                 '''
             }
@@ -54,7 +39,6 @@ pipeline {
         stage('Verify') {
             steps {
                 sh '''
-                    cd $APP_DIR
                     docker compose ps
                 '''
             }
