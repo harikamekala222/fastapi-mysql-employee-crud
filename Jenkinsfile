@@ -24,6 +24,9 @@ pipeline {
             steps {
                 sh '''
                     docker compose down || true
+
+                    docker stop employee_mysql employee_backend employee_frontend 2>/dev/null || true
+                    docker rm employee_mysql employee_backend employee_frontend 2>/dev/null || true
                 '''
             }
         }
